@@ -543,6 +543,7 @@ sds sdsfromlonglong(long long value) {
 }
 
 /* Like sdscatprintf() but gets va_list instead of being variadic. */
+//fmt打印的参数例"%d %d"，ap参数地址，打印内容加到sds s后边 返回sds类型
 sds sdscatvprintf(sds s, const char *fmt, va_list ap) {
     va_list cpy;
     char staticbuf[1024], *buf = staticbuf, *t;
@@ -550,6 +551,7 @@ sds sdscatvprintf(sds s, const char *fmt, va_list ap) {
 
     /* We try to start using a static buffer for speed.
      * If not possible we revert to heap allocation. */
+    //尝试在buffer区高效率执行，如果获取不到就到堆中申请空间运行
     if (buflen > sizeof(staticbuf)) {
         buf = s_malloc(buflen);
         if (buf == NULL) return NULL;
@@ -559,12 +561,13 @@ sds sdscatvprintf(sds s, const char *fmt, va_list ap) {
 
     /* Try with buffers two times bigger every time we fail to
      * fit the string in the current buffer size. */
+    //尝试打印的时候，每次失败都会重新申请2倍buff空间
     while(1) {
         buf[buflen-2] = '\0';
-        va_copy(cpy,ap);
-        vsnprintf(buf, buflen, fmt, cpy);
-        va_end(cpy);
-        if (buf[buflen-2] != '\0') {
+        va_copy(cpy,ap);  //从ap复制参数列表
+        vsnprintf(buf, buflen, fmt, cpy);  //打印内容到buf中
+        va_end(cpy);   //清空cpy参数列表
+        if (buf[buflen-2] != '\0') {    //原先定义的结束符位置的内容发现不是结束符，说明打印内容超出buff 申请2倍空间再打印
             if (buf != staticbuf) s_free(buf);
             buflen *= 2;
             buf = s_malloc(buflen);
@@ -576,7 +579,7 @@ sds sdscatvprintf(sds s, const char *fmt, va_list ap) {
 
     /* Finally concat the obtained string to the SDS string and return it. */
     t = sdscat(s, buf);
-    if (buf != staticbuf) s_free(buf);
+    if (buf != staticbuf) s_free(buf);   //非静态区域则需要手动释放
     return t;
 }
 
@@ -596,11 +599,12 @@ sds sdscatvprintf(sds s, const char *fmt, va_list ap) {
  *
  * s = sdscatprintf(sdsempty(), "... your format ...", args);
  */
+//参数可变的动态说明
 sds sdscatprintf(sds s, const char *fmt, ...) {
     va_list ap;
     char *t;
     va_start(ap, fmt);  //获取可变参数列表的第一个参数的地址
-    t = sdscatvprintf(s,fmt,ap);
+    t = sdscatvprintf(s,fmt,ap);   //调用上方打印
     va_end(ap);   //清空va_list可变参数列表 123
     return t;
 }
@@ -621,6 +625,7 @@ sds sdscatprintf(sds s, const char *fmt, ...) {
  * %U - 64 bit unsigned integer (unsigned long long, uint64_t)
  * %% - Verbatim "%" character.
  */
+//cwd curr
 sds sdscatfmt(sds s, char const *fmt, ...) {
     size_t initlen = sdslen(s);
     const char *f = fmt;
