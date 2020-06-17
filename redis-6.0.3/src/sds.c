@@ -601,7 +601,7 @@ sds sdscatprintf(sds s, const char *fmt, ...) {
     char *t;
     va_start(ap, fmt);  //获取可变参数列表的第一个参数的地址
     t = sdscatvprintf(s,fmt,ap);
-    va_end(ap);   //清空va_list可变参数列表
+    va_end(ap);   //清空va_list可变参数列表 check
     return t;
 }
 
