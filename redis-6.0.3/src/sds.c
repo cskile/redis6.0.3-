@@ -534,6 +534,7 @@ int sdsull2str(char *s, unsigned long long v) {
  *
  * sdscatprintf(sdsempty(),"%lld\n", value);
  */
+//调用sdsnewlen，将long long数存入新的sds对象
 sds sdsfromlonglong(long long value) {
     char buf[SDS_LLSTR_SIZE];
     int len = sdsll2str(buf,value);
@@ -598,9 +599,9 @@ sds sdscatvprintf(sds s, const char *fmt, va_list ap) {
 sds sdscatprintf(sds s, const char *fmt, ...) {
     va_list ap;
     char *t;
-    va_start(ap, fmt);
+    va_start(ap, fmt);  //获取可变参数列表的第一个参数的地址
     t = sdscatvprintf(s,fmt,ap);
-    va_end(ap);
+    va_end(ap);   //清空va_list可变参数列表
     return t;
 }
 
